@@ -4,10 +4,6 @@ let board = [];
 
 let solutions = [];
 
-let currentSolution = [];
-
-let currentColumn = 0;
-
 let isRunning = false;
 
 let isPaused = false;
@@ -22,44 +18,40 @@ let backtracks = 0;
 
 let solutionsFound = 0;
 
-const boardElement =
-    document.getElementById("board");
+let displayedSolution = 0;
 
-const nInput =
-    document.getElementById("nInput");
+const boardElement = document.getElementById("board");
 
-const speedInput =
-    document.getElementById("speedInput");
+const nInput = document.getElementById("nInput");
 
-const startButton =
-    document.getElementById("startButton");
+const speedInput = document.getElementById("speedInput");
 
-const pauseButton =
-    document.getElementById("pauseButton");
+const startButton = document.getElementById("startButton");
 
-const stopButton =
-    document.getElementById("stopButton");
+const pauseButton = document.getElementById("pauseButton");
 
-const resetButton =
-    document.getElementById("resetButton");
+const stopButton = document.getElementById("stopButton");
 
-const statusText =
-    document.getElementById("statusText");
+const resetButton = document.getElementById("resetButton");
 
-const message =
-    document.getElementById("message");
+const previousButton = document.getElementById("previousButton");
 
-const solutionCount =
-    document.getElementById("solutionCount");
+const nextButton = document.getElementById("nextButton");
 
-const queensPlaced =
-    document.getElementById("queensPlaced");
+const solutionDisplay = document.getElementById("solutionDisplay");
 
-const attemptsDisplay =
-    document.getElementById("attempts");
+const statusText = document.getElementById("statusText");
 
-const backtracksDisplay =
-    document.getElementById("backtracks");
+const message = document.getElementById("message");
+
+const solutionCount = document.getElementById("solutionCount");
+
+const queensPlaced = document.getElementById("queensPlaced");
+
+const attemptsDisplay = document.getElementById("attempts");
+
+const backtracksDisplay = document.getElementById("backtracks");
+
 
 function createBoard() {
 
@@ -71,36 +63,29 @@ function createBoard() {
     boardElement.style.gridTemplateRows =
         `repeat(${N}, 1fr)`;
 
-
     for (let row = 0; row < N; row++) {
 
         for (let column = 0; column < N; column++) {
 
-            const cell =
-                document.createElement("div");
+            const cell = document.createElement("div");
 
             cell.classList.add("cell");
 
-
             if ((row + column) % 2 === 0) {
-
                 cell.classList.add("white");
-
             } else {
-
                 cell.classList.add("black");
             }
-
 
             cell.dataset.row = row;
 
             cell.dataset.column = column;
 
-
             boardElement.appendChild(cell);
         }
     }
 }
+
 
 function getCell(row, column) {
 
@@ -108,6 +93,7 @@ function getCell(row, column) {
         `.cell[data-row="${row}"][data-column="${column}"]`
     );
 }
+
 
 function isSafe(row, column) {
 
@@ -121,7 +107,6 @@ function isSafe(row, column) {
             board[previousColumn];
 
         if (previousRow === row) {
-
             return false;
         }
 
@@ -129,13 +114,13 @@ function isSafe(row, column) {
             Math.abs(previousRow - row) ===
             Math.abs(previousColumn - column)
         ) {
-
             return false;
         }
     }
 
     return true;
 }
+
 
 function wait(ms) {
 
@@ -145,6 +130,7 @@ function wait(ms) {
 
     });
 }
+
 
 async function waitIfPaused() {
 
@@ -158,24 +144,23 @@ async function waitIfPaused() {
     }
 }
 
+
 function getSpeed() {
 
     return parseInt(speedInput.value);
 }
 
+
 function updateStats() {
 
     let placed = 0;
 
-
     for (let column = 0; column < N; column++) {
 
         if (board[column] !== -1) {
-
             placed++;
         }
     }
-
 
     queensPlaced.textContent = placed;
 
@@ -184,7 +169,17 @@ function updateStats() {
     backtracksDisplay.textContent = backtracks;
 
     solutionCount.textContent = solutionsFound;
+
+    solutionDisplay.textContent =
+        `Solution ${
+            solutions.length === 0
+                ? 0
+                : displayedSolution + 1
+        } / ${solutions.length}`;
+
+    updateNavigationButtons();
 }
+
 
 function clearCellState(cell) {
 
@@ -200,9 +195,26 @@ function clearCellState(cell) {
     );
 }
 
+
+function placeQueen(row, column) {
+
+    const cell =
+        getCell(row, column);
+
+    if (!cell) {
+        return;
+    }
+
+    cell.textContent = "♛";
+
+    cell.classList.add("queen");
+}
+
+
 function removeQueen(row, column) {
 
-    const cell = getCell(row, column);
+    const cell =
+        getCell(row, column);
 
     if (!cell) {
         return;
@@ -215,83 +227,83 @@ function removeQueen(row, column) {
     cell.classList.add("backtracking");
 }
 
-function placeQueen(row, column) {
 
-    const cell = getCell(row, column);
+function saveSolution() {
 
-    if (!cell) {
-        return;
-    }
+    const solution = [...board];
 
-    cell.textContent = "♛";
+    solutions.push(solution);
 
-    cell.classList.add("queen");
+    solutionsFound++;
+
+    displayedSolution =
+        solutions.length - 1;
+
+    updateStats();
 }
+
 
 async function solveAnimated(column) {
 
     if (isStopped) {
-
-        return false;
+        return;
     }
 
     await waitIfPaused();
 
-
     if (isStopped) {
-
-        return false;
+        return;
     }
 
     if (column === N) {
 
-        solutionsFound++;
+        saveSolution();
 
-        currentSolution = [...board];
+        statusText.textContent =
+            "Solution Found";
 
-        updateStats();
+        message.textContent =
+            `Solution ${solutionsFound} found! Continuing search for more solutions...`;
 
-        statusText.textContent = "Solution Found!";
+        await wait(getSpeed());
 
-        message.textContent = "A valid arrangement has been found.";
-
-        return true;
+        return;
     }
 
     for (let row = 0; row < N; row++) {
 
         if (isStopped) {
-
-            return false;
+            return;
         }
 
-
         await waitIfPaused();
+
+        if (isStopped) {
+            return;
+        }
 
         attempts++;
 
         updateStats();
 
-        const cell = getCell(row, column);
+        const cell =
+            getCell(row, column);
 
         clearCellState(cell);
 
         cell.classList.add("checking");
 
+        statusText.textContent =
+            "Checking Position";
 
-        statusText.textContent = "Checking Position";
-
-        message.textContent = `Checking row ${row + 1}, column ${column + 1}`;
-
+        message.textContent =
+            `Checking row ${row + 1}, column ${column + 1}`;
 
         await wait(getSpeed());
 
-
         if (isStopped) {
-
-            return false;
+            return;
         }
-
 
         await waitIfPaused();
 
@@ -301,18 +313,16 @@ async function solveAnimated(column) {
 
             cell.classList.add("safe");
 
+            statusText.textContent =
+                "Safe Position";
 
-            statusText.textContent = "Safe Position";
-
-            message.textContent = `Queen can be placed at row ${row + 1}, column ${column + 1}`;
-
+            message.textContent =
+                `Safe: row ${row + 1}, column ${column + 1}`;
 
             await wait(getSpeed());
 
-
             if (isStopped) {
-
-                return false;
+                return;
             }
 
             board[column] = row;
@@ -321,39 +331,27 @@ async function solveAnimated(column) {
 
             updateStats();
 
-
             await wait(getSpeed());
 
-            const result =
-                await solveAnimated(column + 1);
-
+            await solveAnimated(column + 1);
 
             if (isStopped) {
-
-                return false;
-            }
-
-
-            if (result) {
-
-                return true;
+                return;
             }
 
             await waitIfPaused();
 
+            statusText.textContent =
+                "Backtracking";
 
-            statusText.textContent = "Backtracking";
-
-            message.textContent = `No solution from column ${column + 1}. Going back.`;
-
+            message.textContent =
+                `Going back from column ${column + 1}...`;
 
             cell.classList.remove("safe");
 
             cell.classList.add("backtracking");
 
-
             removeQueen(row, column);
-
 
             board[column] = -1;
 
@@ -361,45 +359,38 @@ async function solveAnimated(column) {
 
             updateStats();
 
-
             await wait(getSpeed());
 
             clearCellState(cell);
 
-        }
-        else {
+        } else {
 
             cell.classList.remove("checking");
 
             cell.classList.add("unsafe");
 
-
             statusText.textContent =
                 "Unsafe Position";
 
             message.textContent =
-                `Queen cannot be placed at row ${row + 1}, column ${column + 1}`;
-
+                `Unsafe: row ${row + 1}, column ${column + 1}`;
 
             await wait(getSpeed());
-
 
             clearCellState(cell);
         }
     }
-
-
-    return false;
 }
+
 
 async function startSimulation() {
 
     if (isRunning) {
-
         return;
     }
 
-    N = parseInt(nInput.value);
+    N =
+        parseInt(nInput.value);
 
     if (isNaN(N) || N < 1 || N > 10) {
 
@@ -416,15 +407,13 @@ async function startSimulation() {
 
     solutions = [];
 
-    currentSolution = [];
-
-    currentColumn = 0;
-
     attempts = 0;
 
     backtracks = 0;
 
     solutionsFound = 0;
+
+    displayedSolution = 0;
 
     isRunning = true;
 
@@ -442,29 +431,30 @@ async function startSimulation() {
 
     resetButton.disabled = false;
 
+    previousButton.disabled = true;
+
+    nextButton.disabled = true;
+
     nInput.disabled = true;
 
+    pauseButton.textContent =
+        "⏸ Pause";
 
     statusText.textContent =
         "Starting";
 
     message.textContent =
-        "Starting the backtracking algorithm...";
-
+        "Starting backtracking search...";
 
     updateStats();
 
-
     await wait(500);
 
-
     if (isStopped) {
-
         return;
     }
 
-    const solved =
-        await solveAnimated(0);
+    await solveAnimated(0);
 
     if (!isStopped) {
 
@@ -480,14 +470,17 @@ async function startSimulation() {
 
         nInput.disabled = false;
 
+        if (solutions.length > 0) {
 
-        if (solved) {
+            displayedSolution = 0;
+
+            showSolution(0);
 
             statusText.textContent =
-                "Simulation Complete";
+                "Search Complete";
 
             message.textContent =
-                `Found a solution for N = ${N}.`;
+                `Found all ${solutions.length} solution(s) for N = ${N}.`;
 
         } else {
 
@@ -497,13 +490,91 @@ async function startSimulation() {
             message.textContent =
                 `No solution exists for N = ${N}.`;
         }
+
+        updateStats();
     }
 }
+
+
+function showSolution(index) {
+
+    if (
+        index < 0 ||
+        index >= solutions.length
+    ) {
+        return;
+    }
+
+    displayedSolution = index;
+
+    const solution =
+        solutions[index];
+
+    createBoard();
+
+    for (let column = 0; column < N; column++) {
+
+        const row =
+            solution[column];
+
+        if (row !== -1) {
+
+            const cell =
+                getCell(row, column);
+
+            cell.textContent = "♛";
+
+            cell.classList.add("queen");
+        }
+    }
+
+    solutionDisplay.textContent =
+        `Solution ${index + 1} / ${solutions.length}`;
+
+    updateNavigationButtons();
+}
+
+
+function previousSolution() {
+
+    if (displayedSolution > 0) {
+
+        displayedSolution--;
+
+        showSolution(displayedSolution);
+    }
+}
+
+
+function nextSolution() {
+
+    if (
+        displayedSolution <
+        solutions.length - 1
+    ) {
+
+        displayedSolution++;
+
+        showSolution(displayedSolution);
+    }
+}
+
+
+function updateNavigationButtons() {
+
+    previousButton.disabled =
+        solutions.length === 0 ||
+        displayedSolution <= 0;
+
+    nextButton.disabled =
+        solutions.length === 0 ||
+        displayedSolution >= solutions.length - 1;
+}
+
 
 function togglePause() {
 
     if (!isRunning) {
-
         return;
     }
 
@@ -515,15 +586,13 @@ function togglePause() {
             "⏸ Pause";
 
         statusText.textContent =
-            "Resuming";
+            "Running";
 
         message.textContent =
             "Simulation resumed.";
 
-    }
-    else {
+    } else {
 
-        // Pause
         isPaused = true;
 
         pauseButton.textContent =
@@ -533,17 +602,16 @@ function togglePause() {
             "Paused";
 
         message.textContent =
-            "Simulation is paused.";
+            "Simulation paused.";
     }
 }
+
 
 function stopSimulation() {
 
     if (!isRunning) {
-
         return;
     }
-
 
     isStopped = true;
 
@@ -551,9 +619,7 @@ function stopSimulation() {
 
     isPaused = false;
 
-
     clearTimeout(timer);
-
 
     startButton.disabled = false;
 
@@ -563,14 +629,18 @@ function stopSimulation() {
 
     nInput.disabled = false;
 
+    pauseButton.textContent =
+        "⏸ Pause";
+
     statusText.textContent =
         "Stopped";
 
     message.textContent =
-        "Simulation stopped.";
+        `Simulation stopped. ${solutionsFound} solution(s) found so far.`;
 
     updateStats();
 }
+
 
 function resetSimulation() {
 
@@ -582,21 +652,17 @@ function resetSimulation() {
 
     clearTimeout(timer);
 
-    N = parseInt(nInput.value) || 4;
-
+    N =
+        parseInt(nInput.value) || 4;
 
     if (N < 1 || N > 10) {
-
         N = 4;
     }
-
 
     board =
         new Array(N).fill(-1);
 
     solutions = [];
-
-    currentSolution = [];
 
     attempts = 0;
 
@@ -604,9 +670,7 @@ function resetSimulation() {
 
     solutionsFound = 0;
 
-
-    nInput.value = N;
-
+    displayedSolution = 0;
 
     startButton.disabled = false;
 
@@ -614,12 +678,14 @@ function resetSimulation() {
 
     stopButton.disabled = true;
 
-    nInput.disabled = false;
+    previousButton.disabled = true;
 
+    nextButton.disabled = true;
+
+    nInput.disabled = false;
 
     pauseButton.textContent =
         "⏸ Pause";
-
 
     statusText.textContent =
         "Ready";
@@ -627,33 +693,43 @@ function resetSimulation() {
     message.textContent =
         "Enter N and press Start.";
 
+    solutionDisplay.textContent =
+        "Solution 0 / 0";
 
     updateStats();
 
     createBoard();
 }
 
+
 startButton.addEventListener(
     "click",
     startSimulation
 );
-
 
 pauseButton.addEventListener(
     "click",
     togglePause
 );
 
-
 stopButton.addEventListener(
     "click",
     stopSimulation
 );
 
-
 resetButton.addEventListener(
     "click",
     resetSimulation
+);
+
+previousButton.addEventListener(
+    "click",
+    previousSolution
+);
+
+nextButton.addEventListener(
+    "click",
+    nextSolution
 );
 
 resetSimulation();
