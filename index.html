@@ -1,0 +1,215 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>N-Queens Simulator</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>N-Queens Simulator</h1>
+
+        <p class="description">
+            Visualize the N-Queens problem using the
+            Backtracking algorithm.
+        </p>
+
+        <div class="controls">
+
+            <div class="input-group">
+
+                <label for="nInput">
+                    Board Size (N)
+                </label>
+
+                <input
+                    type="number"
+                    id="nInput"
+                    min="1"
+                    max="10"
+                    value="4"
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label for="speedInput">
+                    Speed
+                </label>
+
+                <select id="speedInput">
+
+                    <option value="1000">
+                        Slow
+                    </option>
+
+                    <option value="500" selected>
+                        Medium
+                    </option>
+
+                    <option value="150">
+                        Fast
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <div class="buttons">
+
+            <button id="startButton">
+                ▶ Start
+            </button>
+
+            <button id="pauseButton">
+                ⏸ Pause
+            </button>
+
+            <button id="stopButton">
+                ⏹ Stop
+            </button>
+
+            <button id="resetButton">
+                🔄 Reset
+            </button>
+
+        </div>
+
+        <div class="status">
+
+            <h2 id="statusText">
+                Ready
+            </h2>
+
+            <p id="message">
+                Enter N and press Start.
+            </p>
+
+        </div>
+
+        <div id="board"></div>
+
+        <div class="legend">
+
+            <div class="legend-item">
+
+                <span class="legend-box checking"></span>
+
+                <span>Checking</span>
+
+            </div>
+
+
+            <div class="legend-item">
+
+                <span class="legend-box safe"></span>
+
+                <span>Safe</span>
+
+            </div>
+
+
+            <div class="legend-item">
+
+                <span class="legend-box unsafe"></span>
+
+                <span>Unsafe</span>
+
+            </div>
+
+
+            <div class="legend-item">
+
+                <span class="legend-box backtracking"></span>
+
+                <span>Backtracking</span>
+
+            </div>
+
+        </div>
+
+        <div class="result">
+
+            <div class="result-box">
+
+                <h3>Solutions</h3>
+
+                <p id="solutionCount">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <h3>Queens Placed</h3>
+
+                <p id="queensPlaced">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <h3>Attempts</h3>
+
+                <p id="attempts">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="result-box">
+
+                <h3>Backtracks</h3>
+
+                <p id="backtracks">
+                    0
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="explanation">
+
+            <h2>How It Works</h2>
+
+            <p>
+                The algorithm places queens one column at a time.
+                Before placing a queen, it checks whether the
+                position is safe.
+            </p>
+
+            <p>
+                If a position is unsafe, it tries another position.
+                If no position works, the algorithm goes back to
+                the previous column. This process is called
+                <strong>Backtracking</strong>.
+            </p>
+
+        </div>
+
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
